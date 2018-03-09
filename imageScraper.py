@@ -1,6 +1,7 @@
 import urllib.request
 import sys
 import random
+import scipy.ndimage
 
 def getURLs(URL): #returns a list of URLs for a specific imagnet URL
 	URLs = []
@@ -14,17 +15,11 @@ def getURLs(URL): #returns a list of URLs for a specific imagnet URL
 
 # file_type = "." + URLs[0].split('.')[-1]
 def testOpenImage(path):
-	print("testing")
 	try:
-		image = open(path)
-		print("YESEJHDSJHDJL")
-		image.close()
-		print("YES")
-	except:
-		print("An Error occured when trying to open image",path)
-		print("NO")
+		image = scipy.ndimage.imread(path,flatten=False)
+	except OSError:
+		print("An OS Error occured when trying to open image",path)
 		return 404
-	print("YESSS")
 	return 
 
 def downloadImage(URL,filename,filepath):
@@ -35,7 +30,7 @@ def downloadImage(URL,filename,filepath):
 		file = open(filepath + filename + ".jpg", "wb")
 		file.write(image)
 		file.close()
-		assert(open(filepath + filename + ".jpg")) , "File Corrupted"
+		assert(testOpenImage(filepath + filename + ".jpg") != 404), "File Corrupted"
 	except (urllib.error.HTTPError, urllib.error.URLError, AssertionError):
 		print("Error in downloadImage", filepath + filename)
 		print(URL)
@@ -45,8 +40,6 @@ def downloadImage(URL,filename,filepath):
 		print("A foreign error occured:",e)
 		print("At this URL:",URL)
 		return 404
-	# valid = testOpenImage(filepath + filename + ".jpg")
-	# print("Valid",valid)
 	return None
 
 def downloadImages(num_of_images,object_name,filepath, URLs):
@@ -90,10 +83,11 @@ def main():
 	cow_images_URL  = "http://image-net.org/api/text/imagenet.synset.geturls?wnid=n01887787"
 	cow_images_URLs = getURLs(cow_images_URL)
 	object_name = "cow"
-	num_of_images = 200
+	num_of_images = 500
 
 	downloadImages(num_of_images,object_name,positive_image_filepath,cow_images_URLs)
 	downloadRandomImages(num_of_images,object_name,negative_image_filepath)
+
 
 print("Imaged Scraper Started :O")
 main()
